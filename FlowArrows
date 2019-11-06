@@ -1,0 +1,44 @@
+---Add Vector Layer---
+
+SELECT StartID, DestID, Weight, 
+       make_line(a.geometry, b.geometry)
+FROM edges
+JOIN nodes a ON edges.StartID = a.ID
+JOIN nodes b ON edges.DestID = b.ID
+WHERE a.ID != b.ID 
+
+---Curved lines---
+
+make_line(
+   start_point($geometry),
+   centroid(
+      offset_curve(
+         $geometry, 
+         length($geometry)/-5.0
+      )
+   ),
+   end_point($geometry)
+)
+
+---Crop lines at the beginning and end---
+
+make_line(
+   start_point($geometry),
+   centroid(
+      offset_curve(
+         $geometry, 
+         length($geometry)/-5.0
+      )
+   ),
+   end_point($geometry)
+)
+
+---Colour arrows---
+
+CASE WHEN
+ x(start_point($geometry)) - x(end_point($geometry)) < 0
+THEN
+ '#1f78b4'
+ELSE
+ '#ff7f00'
+END
